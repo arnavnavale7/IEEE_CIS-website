@@ -1,0 +1,30 @@
+/* Small interactions with clear focus, selected and pressed states. */
+.topic-explorer{margin-top:0;border-bottom:1px solid var(--line)}
+.topic-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;border-block:1px solid var(--line);padding:10px 0}
+.topic-tabs button{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;padding:12px 16px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--muted);font-family:Consolas,'Courier New',monospace;font-size:11px;text-align:left;transition:background-color 160ms ease,color 160ms ease,border-color 160ms ease}
+.topic-tabs button[aria-selected=true]{background:var(--ink);color:#fff;border-color:var(--ink)}.topic-tabs button>span{font-family:inherit;font-size:17px}.topic-tabs button:focus-visible{outline-offset:2px}
+.topic-panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);align-items:center;gap:30px;padding:22px 16px;min-height:104px}.topic-panel[hidden]{display:none}.topic-panel h2{font-size:21px;letter-spacing:-.5px;line-height:1.3;margin:0}.topic-panel p{font-size:13px;line-height:1.7;margin:0}.topic-panel:focus-visible{outline:2px solid var(--cyan);outline-offset:-2px;border-radius:8px}
+.back-to-top{position:fixed;right:24px;bottom:24px;z-index:20;display:flex;align-items:center;gap:10px;min-width:46px;min-height:46px;padding:11px 16px;border:1px solid #87bdcf;border-radius:30px;background:var(--ink);color:#fff;box-shadow:0 4px 18px #10283f24;font-size:12px;transition:background-color 160ms ease,transform 160ms ease}.back-to-top>span:first-child{font-size:21px;line-height:1}.back-to-top:hover{background:var(--cyan);transform:translateY(-2px)}
+.dots button:hover:after{background:#d1f5fc}.dots button:focus-visible{border-radius:6px;outline-offset:0}
+.event-image-link{position:relative;display:block;overflow:hidden;min-width:0}.event-image-link:focus-visible{outline-offset:-5px;outline-color:var(--cyan)}.event-image-hint{position:absolute;right:18px;bottom:18px;border-radius:30px;background:var(--ink);color:white;padding:11px 16px;font-size:12px;box-shadow:0 3px 14px #10283f25}.event-image-link img{transition:transform 260ms var(--ease)}
+.lightbox-inner>img{height:61vh;touch-action:pan-y}.lightbox-thumbnails{position:relative;display:flex;gap:10px;overflow-x:auto;padding:9px 4px 12px;scrollbar-width:thin;scrollbar-color:#7bb7cd #193b51}.lightbox-thumbnails button{flex:0 0 76px;width:76px;height:54px;padding:3px;border:2px solid transparent;border-radius:8px;background:#ffffff1a;opacity:.65;transition:opacity 160ms ease,border-color 160ms ease}.lightbox-thumbnails button[aria-pressed=true]{opacity:1;border-color:#7be2f8}.lightbox-thumbnails button:hover,.lightbox-thumbnails button:focus-visible{opacity:1}.lightbox-thumbnails button:focus-visible{outline-color:white;outline-offset:1px}.lightbox-thumbnails img{width:100%;height:100%;object-fit:cover;border-radius:3px;display:block}
+@media(hover:hover) and (pointer:fine){.topic-tabs button:not([aria-selected=true]):hover{background:#e3f2f8;border-color:#bbdce7;color:var(--ink)}.event-image-link:hover img{transform:scale(1.025)}}
+@media(prefers-reduced-motion:no-preference){.topic-panel:not([hidden]){animation:entrance 200ms var(--ease)}.back-to-top{animation:entrance 180ms var(--ease)}}
+@media(max-width:760px){.topic-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}.topic-panel{min-height:130px;gap:20px}.topic-panel h2{font-size:19px}}
+@media(max-width:560px){.topic-tabs button{padding:10px 12px;font-size:10px}.topic-panel{grid-template-columns:1fr;gap:10px;padding:20px 8px;min-height:148px}.topic-panel h2{font-size:20px}.topic-panel p{font-size:12px}.back-to-top{right:16px;bottom:16px;padding:10px 15px}.back-to-top-label{display:none}.lightbox-inner>img{height:49vh}.lightbox-thumbnails{gap:7px}.lightbox-thumbnails button{flex-basis:64px;width:64px;height:48px}.event-image-hint{right:12px;bottom:12px;font-size:11px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Requested activity, gallery and footer refinements. */
+.binary-headline{position:relative}.binary-trail{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
+.topic-panel{min-height:160px;grid-template-columns:minmax(0,.8fr) minmax(0,1.5fr);padding-block:26px}.topic-panel p{font-size:14px;line-height:1.8;max-width:720px}
+.footer-top .logo{background:transparent;border-radius:0;padding:0;mix-blend-mode:normal;width:160px;height:106px}
+.gallery-reveal{position:relative;margin-top:18px;isolation:isolate;overflow:hidden;border-radius:12px;min-height:175px}
+.gallery-preview-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;max-height:180px;overflow:hidden;filter:blur(3px);opacity:.5;pointer-events:none}
+.gallery-preview-row img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:12px}
+.gallery-reveal:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#f8fbfd08,#f8fbfdee 86%);z-index:1;pointer-events:none}
+.gallery-reveal-action{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center}
+.gallery-reveal-action p{font-size:12px;margin:12px 0 0;color:var(--ink)}
+.event-about p{line-height:1.85}.detail-gallery .photo-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:760px){.topic-panel{min-height:200px}.gallery-preview-row{gap:12px}.gallery-reveal{margin-top:12px}.gallery-preview-row{max-height:150px}.gallery-reveal{min-height:150px}}
+@media(max-width:560px){.topic-panel{grid-template-columns:1fr;gap:12px;min-height:240px;padding:23px 8px}.topic-panel p{font-size:13px}.detail-gallery .photo-grid{grid-template-columns:1fr;gap:14px}.gallery-preview-row{gap:10px;max-height:150px}.gallery-preview-row img{height:150px;aspect-ratio:auto}.gallery-reveal{min-height:150px}.footer-top .logo{width:150px;height:100px}}
+@media(prefers-reduced-motion:reduce),(hover:none),(pointer:coarse){.binary-trail{display:none}}
