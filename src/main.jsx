@@ -7,6 +7,7 @@ import './identity.css';
 import './motion.css';
 import { TopicExplorer, BackToTop } from './interactions';
 import './interactions.css';
+import './type.css';
 import { BinaryHeadline } from './BinaryHeadline';
 import { gsap, ScrollTrigger, useGSAP, prefersMotion, useSiteMotion, useScrolledHeader } from './motion';
 

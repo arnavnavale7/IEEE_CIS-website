@@ -1,0 +1,59 @@
+/* Type and spacing refinements. Loaded last, so each breakpoint below restates
+   the sizes it needs; earlier files set several of these at narrower widths. */
+p{font-size:16px;line-height:1.75}.small{font-size:13px;line-height:1.65}
+.lead{font-size:19px;line-height:1.7;max-width:640px}
+.eyebrow{font-size:12px;letter-spacing:1.6px}
+.button{font-size:14px;min-height:52px}.text-link{font-size:14px}
+.header-inner nav>a{font-size:13px}.header-team{font-size:13px}
+.section{padding-block:clamp(64px,7.5vw,104px)}
+.section-heading{margin-bottom:40px}.preview-label{font-size:12px}
+
+/* Home */
+.editorial-caption{font-size:18px}.hero-note{max-width:600px}.hero-note>p{font-size:17px;line-height:1.7}
+.topic-tabs button{font-size:12px;letter-spacing:.3px}
+.topic-panel{min-height:150px;padding-block:28px}.topic-panel h2{font-size:25px;line-height:1.25}.topic-panel p{font-size:16px;line-height:1.75}
+.chapter-about .about-intro{font-size:19px}.chapter-about-content>p:last-child{font-size:16px}
+.purpose-card{padding:26px 28px}.purpose-card h3{font-size:21px}.purpose-card p{font-size:15px;line-height:1.65}
+.member-copy .role{font-size:19px}.member-caption{font-size:11px}
+.chapter-next>div>p:not(.eyebrow){font-size:17px}
+
+/* Events */
+.page-heading{padding-block:80px 48px}
+.event-meta{font-size:12px}.event-copy p{font-size:16px}.event-date{font-size:14px}.event-image-hint{font-size:13px}
+.detail-grid dl{font-size:15px}.highlights{font-size:16px}.detail-grid h2{font-size:28px}
+.gallery-reveal-action p{font-size:14px}.lightbox-controls p{font-size:14px}.lightbox-controls p span{font-size:12px}
+.empty-state p{font-size:16px}
+
+/* Footer and global controls */
+.footer-label{font-size:12px}.footer-top nav,.socials{font-size:14px}
+.footer-top nav,.socials{gap:2px}.footer-top nav a,.socials>a{display:flex;align-items:center;min-height:44px}.footer-top .small{font-size:13px}.footer-bottom{font-size:12px}
+.back-to-top{font-size:13px}
+
+@media(max-width:1100px){
+.header-inner nav>a{font-size:13px;padding-inline:12px}
+.lead{font-size:18px}
+.topic-tabs button{font-size:11.5px}
+}
+@media(max-width:760px){
+.page-heading{padding-block:52px 34px}.page-heading h1{font-size:44px}
+.topic-panel{min-height:190px}.topic-panel h2{font-size:21px}
+.purpose-card{padding:22px}.purpose-card h3{font-size:19px}.purpose-card p{font-size:14px}
+.member-copy .role{font-size:16px}
+.footer-top .footer-tagline{font-size:15px}
+}
+@media(max-width:560px){
+p{font-size:15.5px}.lead{font-size:16.5px}.eyebrow{font-size:11px;letter-spacing:1.3px}
+.button{font-size:13.5px}.text-link{font-size:13.5px}
+.editorial-caption{font-size:15px}.hero-note>p{font-size:15.5px;line-height:1.7}
+.hero-note .button{font-size:13px;min-height:48px}.hero-note .text-link{font-size:13px}
+.topic-tabs button{font-size:11px;letter-spacing:.2px}
+.topic-panel{min-height:230px;padding-block:24px}.topic-panel h2{font-size:21px}.topic-panel p{font-size:15px}
+.chapter-about .about-intro{font-size:17px}.chapter-about-content>p:last-child{font-size:15px}
+.purpose-card{padding:22px}.purpose-card p{font-size:14.5px}
+.member-copy .role{font-size:14px}.member-caption{font-size:10px;letter-spacing:.8px}
+.chapter-next>div>p:not(.eyebrow){font-size:16px}
+.page-heading h1{font-size:38px}
+.event-copy p{font-size:15.5px}.event-date{font-size:13.5px}.event-image-hint{font-size:12px}
+.lightbox-controls p{font-size:13px}
+.footer-top .small{font-size:12.5px}.footer-bottom{font-size:11.5px;flex-wrap:wrap}.footer-top .footer-tagline{font-size:17px}
+}
