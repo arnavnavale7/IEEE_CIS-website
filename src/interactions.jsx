@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { gsap, useGSAP, prefersMotion } from './motion';
 
 const topics = [
   ['Hackathons', 'Turn an idea into something real.', 'Hackathons bring students together to tackle a challenge, explore possible solutions and build a working prototype. From brainstorming and coding to testing and presenting, the experience is about learning through experimentation, collaborating under a deadline and making an idea tangible.'],
@@ -10,6 +11,15 @@ const topics = [
 export function TopicExplorer() {
   const [active, setActive] = useState(0);
   const tabs = useRef([]);
+  const root = useRef(null);
+  const first = useRef(true);
+  // The new panel's heading and text slide in from the side of the chosen tab.
+  useGSAP(() => {
+    if (first.current) { first.current = false; return; }
+    if (!prefersMotion()) return;
+    const panel = root.current.querySelector(`#topic-panel-${active}`);
+    gsap.from(panel.children, { x: (i) => i ? 26 : -18, opacity: 0, duration: 0.65, stagger: 0.07, ease: 'expo.out', clearProps: 'opacity,transform' });
+  }, { scope: root, dependencies: [active] });
   function navigate(event, index) {
     let next;
     if (event.key === 'ArrowRight') next = (index + 1) % topics.length;
@@ -21,7 +31,7 @@ export function TopicExplorer() {
     setActive(next);
     tabs.current[next]?.focus();
   }
-  return <div className="topic-explorer">
+  return <div className="topic-explorer" ref={root}>
     <div className="topic-tabs" role="tablist" aria-label="Explore club activities">
       {topics.map(([title], index) => <button key={title} ref={el => tabs.current[index] = el} id={`topic-tab-${index}`} type="button" role="tab" aria-selected={active === index} aria-controls={`topic-panel-${index}`} tabIndex={active === index ? 0 : -1} onClick={() => setActive(index)} onKeyDown={event => navigate(event, index)}>{title}<span aria-hidden="true">↗</span></button>)}
     </div>

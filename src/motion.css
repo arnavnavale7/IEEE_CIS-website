@@ -1,17 +1,16 @@
 /* Motion is limited to interaction feedback, a brief entrance and team slides. */
 :root{--ease:cubic-bezier(.2,.7,.3,1)}
-.button,.header-team,.menu-toggle,.copy-email,.lightbox-controls button,.lightbox-close,.header-socials a{transition:background-color 160ms ease,color 160ms ease,box-shadow 180ms ease,transform 180ms var(--ease)}
-.text-link,.footer-top a,.contact-email,.header-inner nav>a{transition:color 160ms ease,background-color 160ms ease}
+.button,.header-team,.menu-toggle,.lightbox-controls button,.lightbox-close,.header-socials a{transition:background-color 160ms ease,color 160ms ease,box-shadow 180ms ease,transform 180ms var(--ease)}
+.text-link,.footer-top a,.header-inner nav>a{transition:color 160ms ease,background-color 160ms ease}
 .button>span,.text-link>span,.header-team>span{transition:transform 180ms var(--ease)}
 .event-card,.purpose-card{transition:transform 220ms var(--ease),border-color 180ms ease,box-shadow 220ms ease}
 .gallery-thumb img{transition:transform 260ms var(--ease)}.gallery-thumb>span{transition:background-color 160ms ease,color 160ms ease}.dots button:after{transition:background-color 180ms ease,transform 180ms ease}.dots button.selected:after{transform:scale(1.3)}
-.enquiry-form input,.enquiry-form select,.enquiry-form textarea{transition:border-color 160ms ease,box-shadow 160ms ease}.enquiry-form :is(input,select,textarea):focus{border-color:var(--cyan);box-shadow:0 0 0 3px #007e9c12}
-.button:active:not(:disabled),.menu-toggle:active,.copy-email:active{transform:translateY(1px)}
+.button:active:not(:disabled),.menu-toggle:active{transform:translateY(1px)}
 .event-card:focus-within{border-color:#89bacb;box-shadow:0 8px 25px #10283f0b}.gallery-thumb:focus-visible>span{background:var(--cyan);color:#fff}
 @media(hover:hover) and (pointer:fine){
 .button:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 16px #10283f18}.button:hover>span,.text-link:hover>span,.header-team:hover>span{transform:translate(2px,-1px)}
 .header-inner nav>a:hover{background:#ffffff17;color:#fff}.header-socials a:hover{background:#ffffff1a;transform:translateY(-1px)}
-.event-card:hover,.purpose-card:hover{transform:translateY(-3px);border-color:#93c1d1;box-shadow:0 10px 28px #10283f09}.gallery-thumb:hover img{transform:scale(1.025)}.gallery-thumb:hover>span{background:var(--cyan);color:#fff}.footer-top a:hover{color:#8cddf0}.copy-email:hover{background:var(--pale)}
+.event-card:hover,.purpose-card:hover{transform:translateY(-3px);border-color:#93c1d1;box-shadow:0 10px 28px #10283f09}.gallery-thumb:hover img{transform:scale(1.025)}.gallery-thumb:hover>span{background:var(--cyan);color:#fff}.footer-top a:hover{color:#8cddf0}
 }
 @keyframes entrance{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes portrait-arrive{from{opacity:0;transform:translateX(-35px)}to{opacity:1;transform:translateX(0)}}
@@ -23,7 +22,33 @@
 .staged-carousel .team-slide[aria-hidden=false] h3{animation:member-arrive 750ms ease 700ms both}
 .staged-carousel .team-slide[aria-hidden=false] .role{animation:member-arrive 650ms ease 1100ms both}
 .staged-carousel .team-slide[aria-hidden=false] .member-caption{animation:member-arrive 600ms ease 1300ms both}
-.lightbox[open],.prepared-email{animation:entrance 180ms var(--ease)}.lightbox-inner>img{animation:photo-enter 180ms ease}
+.lightbox[open]{animation:entrance 180ms var(--ease)}.lightbox-inner>img{animation:photo-enter 180ms ease}
 }
 @media(max-width:760px) and (prefers-reduced-motion:no-preference){.header-inner nav.open{animation:entrance 180ms var(--ease)}}
+/* GSAP (src/motion.js) handles entrances and scroll reveals. These rules add
+   ambient drift and hover/focus feedback; everything moves via transform or opacity. */
+.heading-dot{display:inline-block;transform-origin:50% 85%}
+header{transition:box-shadow 260ms ease,background-color 260ms ease}header.is-scrolled{background:#f8fbfdfa;box-shadow:0 12px 30px -20px #10283f59}
+.text-link{position:relative}.text-link:after{content:'';position:absolute;left:0;right:0;bottom:0;height:1.5px;background:currentColor;transform:scaleX(0);transform-origin:right;transition:transform 340ms var(--ease)}.hero-note .text-link:after{bottom:-1px}
+.text-link:focus-visible:after{transform:scaleX(1);transform-origin:left}
+.button{position:relative;isolation:isolate;overflow:hidden}.button:before{content:'';position:absolute;inset:0;z-index:-1;background:#1f5273;transform:scaleX(0);transform-origin:right;transition:transform 420ms var(--ease)}
+.button:focus-visible:not(:disabled):before{transform:scaleX(1);transform-origin:left}
+.purpose-icon svg{transition:transform 420ms var(--ease)}.event-image-hint{transition:transform 260ms var(--ease),background-color 200ms ease}
+.footer-top nav a,.socials>a{justify-self:start;transition:color 160ms ease,transform 220ms var(--ease)}
+.page-heading:after{transform:translate3d(0,var(--drift,0px),0)}
+.header-inner nav>a:after{transition:transform 220ms var(--ease)}
+@media(hover:hover) and (pointer:fine){
+.text-link:hover:after{transform:scaleX(1);transform-origin:left}
+.button:hover:not(:disabled){background:var(--ink)}.button:hover:not(:disabled):before{transform:scaleX(1);transform-origin:left}
+.purpose-card:hover .purpose-icon svg{transform:rotate(-10deg) scale(1.1)}
+.event-image-link:hover .event-image-hint{transform:translateY(-3px);background:var(--cyan)}
+.footer-top nav a:hover,.socials>a:hover{transform:translateX(4px)}
+.header-inner nav>a:not(.active):hover:after{content:'';position:absolute;left:50%;bottom:5px;width:3px;height:3px;background:#6edbf2;border-radius:50%}
+}
+@keyframes grid-drift{to{transform:translate3d(0,48px,0)}}
+@keyframes grid-drift-small{to{transform:translate3d(0,40px,0)}}
+@media(prefers-reduced-motion:no-preference){
+.hero-editorial:before{inset:-48px 0 0;animation:grid-drift 14s linear infinite}
+.team-section .carousel-window:before{inset:-40px 0 0;animation:grid-drift-small 12s linear infinite}
+}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

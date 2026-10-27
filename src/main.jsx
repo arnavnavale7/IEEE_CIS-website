@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useRef, useState } from 'react';
+import React, { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Link, NavLink, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { club, team, events, gallery } from './content';
@@ -7,7 +7,10 @@ import './identity.css';
 import './motion.css';
 import { TopicExplorer, BackToTop } from './interactions';
 import './interactions.css';
+import './contact.css';
+import './type.css';
 import { BinaryHeadline } from './BinaryHeadline';
+import { gsap, ScrollTrigger, useGSAP, motionOK, finePointer, prefersMotion, reveal, decode, useSiteMotion, useScrolledHeader } from './motion';
 
 const links = [['/', 'Home'], ['/past-events', 'Past events'], ['/upcoming-events', 'Upcoming events'], ['/contact', 'Contact us']];
 const Arrow = () => <span aria-hidden="true">↗</span>;
@@ -15,10 +18,12 @@ function Logo(){return <img className="logo" src="/images/club-logo-sticker.png"
 function SocialIcon({name}){return name==='Instagram'?<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1" fill="currentColor" stroke="none"/></svg>:<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M20.45 2H3.55C2.69 2 2 2.68 2 3.52v16.96c0 .84.69 1.52 1.55 1.52h16.9c.86 0 1.55-.68 1.55-1.52V3.52c0-.84-.69-1.52-1.55-1.52ZM7.93 18.75H4.98V9.2h2.95v9.55ZM6.45 7.9a1.71 1.71 0 1 1 0-3.42 1.71 1.71 0 0 1 0 3.42Zm12.3 10.85H15.8V14.1c0-1.11-.02-2.54-1.55-2.54-1.55 0-1.79 1.21-1.79 2.46v4.73H9.51V9.2h2.83v1.3h.04c.39-.74 1.36-1.53 2.79-1.53 2.98 0 3.58 1.96 3.58 4.51v5.27Z"/></svg>}
 function NavbarSocials(){return <div className="header-socials" aria-label="Social media">{[['Instagram',club.instagram],['LinkedIn',club.linkedin]].filter(([,url])=>url).map(([name,url])=><a key={name} href={url} target="_blank" rel="noopener noreferrer" aria-label={`IEEE CIS on ${name}`} title={name}><SocialIcon name={name}/></a>)}</div>}
 function App(){
- const [menu,setMenu]=useState(false); const {pathname,hash}=useLocation();
+ const [menu,setMenu]=useState(false); const {pathname,hash}=useLocation(); const main=useRef(null);
  useEffect(()=>{if(!menu)return;const close=e=>{if(e.key==='Escape'){setMenu(false);document.querySelector('.menu-toggle')?.focus()}};document.addEventListener('keydown',close);return()=>document.removeEventListener('keydown',close)},[menu]);
- useEffect(()=>{setMenu(false);if(hash){requestAnimationFrame(()=>document.getElementById(hash.slice(1))?.scrollIntoView())}else{window.scrollTo(0,0);} const title=links.find(([p])=>p===pathname)?.[1] || 'Event details'; document.title=`${title} · IEEE CIS VIT Pune`;},[pathname,hash]);
- return <><a className="skip" href="#main">Skip to content</a><header><div className="container header-inner"><Link to="/" aria-label="IEEE CIS home"><Logo/></Link><button className="menu-toggle" aria-expanded={menu} aria-controls="main-nav" onClick={()=>setMenu(!menu)}>{menu?'Close ✕':'Menu ☰'}</button><nav id="main-nav" className={menu?'open':''} aria-label="Main navigation">{links.map(([to,label])=><NavLink key={to} end={to==='/'} to={to}>{label}</NavLink>)}<NavbarSocials/></nav><a className="header-team" href="/#team">Meet the team <Arrow/></a></div></header><main id="main"><Routes><Route path="/" element={<Home/>}/><Route path="/past-events" element={<EventsPage status="past"/>}/><Route path="/upcoming-events" element={<EventsPage status="upcoming"/>}/><Route path="/events/:id" element={<EventDetail/>}/><Route path="/contact" element={<Contact/>}/><Route path="*" element={<section className="container section"><h1>Page not found.</h1><Link className="button" to="/">Back to home</Link></section>}/></Routes></main><Footer/><BackToTop/></>;
+ // Layout effect so the scroll position resets before page motion measures scroll triggers.
+ useLayoutEffect(()=>{setMenu(false);if(hash){requestAnimationFrame(()=>document.getElementById(hash.slice(1))?.scrollIntoView())}else{window.scrollTo(0,0);} const title=links.find(([p])=>p===pathname)?.[1] || 'Event details'; document.title=`${title} · IEEE CIS VIT Pune`;},[pathname,hash]);
+ useSiteMotion(main,pathname); useScrolledHeader();
+ return <><a className="skip" href="#main">Skip to content</a><header><div className="container header-inner"><Link to="/" aria-label="IEEE CIS home"><Logo/></Link><button className="menu-toggle" aria-expanded={menu} aria-controls="main-nav" onClick={()=>setMenu(!menu)}>{menu?'Close ✕':'Menu ☰'}</button><nav id="main-nav" className={menu?'open':''} aria-label="Main navigation">{links.map(([to,label])=><NavLink key={to} end={to==='/'} to={to}>{label}</NavLink>)}<NavbarSocials/></nav><a className="header-team" href="/#team">Meet the team <Arrow/></a></div></header><main id="main" ref={main}><Routes><Route path="/" element={<Home/>}/><Route path="/past-events" element={<EventsPage status="past"/>}/><Route path="/upcoming-events" element={<EventsPage status="upcoming"/>}/><Route path="/events/:id" element={<EventDetail/>}/><Route path="/contact" element={<Contact/>}/><Route path="*" element={<section className="container section"><h1>Page not found.</h1><Link className="button" to="/">Back to home</Link></section>}/></Routes></main><Footer/><BackToTop/></>;
 }
 function Eyebrow({children}){return <p className="eyebrow"><span/> {children}</p>}
 function PurposeIcon({kind}){
@@ -60,14 +65,17 @@ function EventsPage({status}){
 function Gallery({photos,expandable=false}){
  const [expanded,setExpanded]=useState(false); const galleryId=useId(); const grid=useRef(null);
  const collapsed=expandable&&!expanded&&photos.length>3; const shown=collapsed?photos.slice(0,3):photos;
- const reveal=()=>{setExpanded(true);requestAnimationFrame(()=>grid.current?.querySelectorAll('.gallery-thumb')[3]?.focus({preventScroll:true}))};
+ const {contextSafe}=useGSAP({scope:grid});
+ // Newly shown photos rise in one after another; focus moves to the first of them.
+ const showRest=contextSafe(()=>{const fresh=[...grid.current.querySelectorAll('.gallery-thumb')].slice(3);ScrollTrigger.refresh();if(prefersMotion())gsap.from(fresh,{y:30,opacity:0,stagger:0.06,duration:0.8,clearProps:'opacity,transform'});fresh[0]?.focus({preventScroll:true})});
+ const showMore=()=>{setExpanded(true);requestAnimationFrame(showRest)};
  const [selected,setSelected]=useState(0); const dialog=useRef(null); const trigger=useRef(null); const strip=useRef(null); const swipe=useRef(null);
  const close=()=>dialog.current.close();
  useEffect(()=>{if(!dialog.current?.open)return;const el=strip.current?.children[selected];if(el)strip.current.scrollTo({left:el.offsetLeft-strip.current.clientWidth/2+el.clientWidth/2,behavior:'instant'})},[selected]);
  useEffect(()=>{const el=dialog.current; const restore=()=>{document.body.style.overflow='';trigger.current?.focus()};el.addEventListener('close',restore);return()=>{el.removeEventListener('close',restore);document.body.style.overflow=''}},[]);
  const open=(i,e)=>{trigger.current=e.currentTarget;setSelected(i);dialog.current.showModal();document.body.style.overflow='hidden'};
  const step=delta=>setSelected(i=>(i+delta+photos.length)%photos.length);
- return <><div className="photo-grid" id={galleryId} ref={grid}>{shown.map((photo,i)=><button className="gallery-thumb" onClick={e=>open(i,e)} key={photo.src} aria-label={`Enlarge photo: ${photo.alt}`}><img src={photo.src} alt={photo.alt} loading="lazy" width="1600" height="1067"/><span aria-hidden="true">↗</span></button>)}</div>{collapsed&&<div className="gallery-reveal"><div className="gallery-preview-row" aria-hidden="true">{photos.slice(3,6).map(photo=><img key={photo.src} src={photo.src} alt="" loading="lazy" width="1600" height="1067"/>)}</div><div className="gallery-reveal-action"><button className="button" type="button" aria-expanded={false} aria-controls={galleryId} onClick={reveal}>Show more photos <span aria-hidden="true">↓</span></button><p>{photos.length-3} more photos from the day</p></div></div>}<dialog ref={dialog} className="lightbox" aria-label="Event photo viewer" onClick={e=>{if(e.target===e.currentTarget)close()}} onKeyDown={e=>{if(e.key==='ArrowRight'){e.preventDefault();step(1)}if(e.key==='ArrowLeft'){e.preventDefault();step(-1)}}}><div className="lightbox-inner"><button className="lightbox-close" onClick={close} autoFocus aria-label="Close photo viewer">✕</button><img key={photos[selected].src} src={photos[selected].src} alt={photos[selected].alt} onTouchStart={e=>{swipe.current={x:e.touches[0].clientX,y:e.touches[0].clientY}}} onTouchEnd={e=>{if(!swipe.current)return;const dx=e.changedTouches[0].clientX-swipe.current.x,dy=e.changedTouches[0].clientY-swipe.current.y;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy))step(dx<0?1:-1);swipe.current=null}}/><div className="lightbox-controls"><button onClick={()=>step(-1)} aria-label="Previous photo">←</button><p aria-live="polite" aria-atomic="true">{photos[selected].alt}<span>{selected+1} / {photos.length}</span></p><button onClick={()=>step(1)} aria-label="Next photo">→</button></div><div className="lightbox-thumbnails" ref={strip} role="group" aria-label="Choose a gallery photo">{photos.map((photo,i)=><button key={photo.src} type="button" aria-label={`View photo ${i+1}: ${photo.alt}`} aria-pressed={i===selected} onClick={()=>setSelected(i)}><img src={photo.src} alt="" loading="lazy"/></button>)}</div></div></dialog></>;
+ return <><div className="photo-grid" id={galleryId} ref={grid}>{shown.map((photo,i)=><button className="gallery-thumb" onClick={e=>open(i,e)} key={photo.src} aria-label={`Enlarge photo: ${photo.alt}`}><img src={photo.src} alt={photo.alt} loading="lazy" width="1600" height="1067"/><span aria-hidden="true">↗</span></button>)}</div>{collapsed&&<div className="gallery-reveal"><div className="gallery-preview-row" aria-hidden="true">{photos.slice(3,6).map(photo=><img key={photo.src} src={photo.src} alt="" loading="lazy" width="1600" height="1067"/>)}</div><div className="gallery-reveal-action"><button className="button" type="button" aria-expanded={false} aria-controls={galleryId} onClick={showMore}>Show more photos <span aria-hidden="true">↓</span></button><p>{photos.length-3} more photos from the day</p></div></div>}<dialog ref={dialog} className="lightbox" aria-label="Event photo viewer" onClick={e=>{if(e.target===e.currentTarget)close()}} onKeyDown={e=>{if(e.key==='ArrowRight'){e.preventDefault();step(1)}if(e.key==='ArrowLeft'){e.preventDefault();step(-1)}}}><div className="lightbox-inner"><button className="lightbox-close" onClick={close} autoFocus aria-label="Close photo viewer">✕</button><img key={photos[selected].src} src={photos[selected].src} alt={photos[selected].alt} onTouchStart={e=>{swipe.current={x:e.touches[0].clientX,y:e.touches[0].clientY}}} onTouchEnd={e=>{if(!swipe.current)return;const dx=e.changedTouches[0].clientX-swipe.current.x,dy=e.changedTouches[0].clientY-swipe.current.y;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy))step(dx<0?1:-1);swipe.current=null}}/><div className="lightbox-controls"><button onClick={()=>step(-1)} aria-label="Previous photo">←</button><p aria-live="polite" aria-atomic="true">{photos[selected].alt}<span>{selected+1} / {photos.length}</span></p><button onClick={()=>step(1)} aria-label="Next photo">→</button></div><div className="lightbox-thumbnails" ref={strip} role="group" aria-label="Choose a gallery photo">{photos.map((photo,i)=><button key={photo.src} type="button" aria-label={`View photo ${i+1}: ${photo.alt}`} aria-pressed={i===selected} onClick={()=>setSelected(i)}><img src={photo.src} alt="" loading="lazy"/></button>)}</div></div></dialog></>;
 }
 function EventDetail(){
  const {id}=useParams(); const e=events.find(e=>e.id===id);
@@ -77,19 +85,139 @@ function EventDetail(){
 function gmailUrl(subject='IEEE CIS enquiry',body=''){
  return `https://mail.google.com/mail/?${new URLSearchParams({view:'cm',fs:'1',to:club.email,su:subject,body})}`;
 }
-function EmailActions({subject='IEEE CIS enquiry',body=''}){
- const [status,setStatus]=useState('');
- async function copy(){try{await navigator.clipboard.writeText(club.email);setStatus('Email address copied.')}catch{setStatus(`Copy this address: ${club.email}`)}}
- return <div className="email-actions"><div><a className="button" href={gmailUrl(subject,body)} target="_blank" rel="noopener noreferrer">Open Gmail <Arrow/></a><a className="text-link" href={`mailto:${club.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`}>Use mail app</a><button type="button" className="copy-email" onClick={copy}>Copy address</button></div><p className="small">Gmail opens in a new tab; sign in if needed. “Use mail app” requires a configured email app. Review and send your email there.</p><span className="small" role="status">{status}</span></div>;
+function mailtoUrl(subject='',body=''){return subject||body?`mailto:${club.email}?${new URLSearchParams({subject,body}).toString().replace(/\+/g,'%20')}`:`mailto:${club.email}`}
+async function copyText(text,done,failed){try{await navigator.clipboard.writeText(text);done()}catch{failed()}}
+const contactTopics=[['Events','Chapter & event enquiries','Find out more about our activities and how you can be part of them.'],['Collaboration','Collaborations','Bring an idea for a talk, a session or a shared learning opportunity.'],['Feedback','Feedback & suggestions','Help us make the chapter a better place to connect and learn.']];
+const contactSubjects=['General enquiry','Events','Collaboration','Feedback'];
+const contactFields=['name','email','message'];
+function checkMessage(v){
+ const errors={};
+ if(!v.name.trim())errors.name='Enter your name.';
+ if(!v.email.trim())errors.email='Enter an email address we can reply to.';
+ else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email.trim()))errors.email='Check the address. It should look like name@example.com.';
+ if(!v.message.trim())errors.message='Write a message before preparing the email.';
+ return errors;
 }
-function ContactForm(){
- const [draft,setDraft]=useState(null);
- function submit(e){e.preventDefault();if(!club.email)return;const data=new FormData(e.currentTarget);setDraft({subject:`IEEE CIS enquiry: ${data.get('subject')}`,body:`Name: ${data.get('name')}\nEmail: ${data.get('email')}\n\n${data.get('message')}`});}
+function Field({id,label,hint,error,counter,textarea,...input}){
+ const Tag=textarea?'textarea':'input';
+ const describedBy=[hint&&`${id}-hint`,counter&&`${id}-count`,error&&`${id}-error`].filter(Boolean).join(' ')||undefined;
+ return <div className={`field${error?' has-error':''}`}><div className="field-head"><label htmlFor={`contact-${id}`}>{label}</label>{hint&&<span className="field-hint" id={`${id}-hint`}>{hint}</span>}</div><Tag id={`contact-${id}`} name={id} aria-invalid={error?true:undefined} aria-describedby={describedBy} {...input}/><div className="field-foot">{error&&<span className="field-error" id={`${id}-error`}>{error}</span>}{counter&&<span className="field-count" id={`${id}-count`}>{counter}</span>}</div></div>;
+}
+function Contact(){
+ const stage=useRef(null),card=useRef(null),address=useRef(null),readyHeading=useRef(null),returning=useRef(false);
+ const [values,setValues]=useState({name:'',email:'',subject:'General enquiry',message:''});
+ const [touched,setTouched]=useState({}),[tried,setTried]=useState(false),[draft,setDraft]=useState(null);
+ const [addressNote,setAddressNote]=useState(''),[draftNote,setDraftNote]=useState('');
+ const errors=checkMessage(values); const shown=key=>tried||touched[key]?errors[key]:undefined;
+ // Background texture for the hero band: rows of random bits, drawn twice so the drift loops.
+ const bits=useMemo(()=>Array.from({length:24},()=>Array.from({length:56},()=>Math.random()<.5?'0':'1').join(' ')).join('\n'),[]);
 
- if(!club.email)return <div className="contact-panel soft"><Eyebrow>CONNECT WITH THE CHAPTER</Eyebrow><h2>Let’s keep in touch.</h2><p>Follow our official Instagram and LinkedIn pages for chapter updates, event announcements and conversations with the community.</p><a className="button" href="/#team">Meet our core team <Arrow/></a><Socials full/></div>;
- return <form className="contact-panel enquiry-form" onSubmit={submit} onChange={()=>setDraft(null)}><h2>Get in touch</h2><p>Write your message, then choose Gmail or your email app to send it.</p><label htmlFor="contact-name">Name</label><input id="contact-name" name="name" autoComplete="name" required maxLength={100}/><label htmlFor="contact-email">Email</label><input id="contact-email" name="email" type="email" autoComplete="email" required/><label htmlFor="contact-subject">Subject</label><select id="contact-subject" name="subject"><option>General enquiry</option><option>Events</option><option>Collaboration</option></select><label htmlFor="contact-message">How can we help?</label><textarea id="contact-message" name="message" required rows={5} maxLength={3000}/><button className="button" type="submit">Prepare email <Arrow/></button>{draft&&<div className="prepared-email"><p role="status">Your draft is ready. Choose where to open it:</p><EmailActions subject={draft.subject} body={draft.body}/></div>}</form>;
+ const {contextSafe}=useGSAP(()=>{
+  const q=gsap.utils.selector(stage); const mm=gsap.matchMedia();
+  mm.add(motionOK,()=>{
+   const {tween,restore}=decode(address.current.firstChild,{duration:1.5});
+   const tl=gsap.timeline({defaults:{ease:'expo.out',duration:1.1}});
+   tl.from(q('.contact-band'),{opacity:0,scale:.96,duration:1.3})
+    .from(q('.contact-intro .eyebrow'),{y:14,opacity:0,duration:.7},'<0.2')
+    .from(q('.contact-title .line>span'),{yPercent:110,opacity:0,stagger:.12},'<0.05')
+    .from(q('.contact-intro .lead'),{y:18,opacity:0,duration:.8},'<0.35')
+    .from(q('.contact-direct'),{y:18,opacity:0,duration:.8},'<0.1')
+    .add(tween,'<0.15')
+    .from(q('.contact-card'),{y:70,opacity:0,duration:1.25},0.3)
+    .from(q('.contact-steps, .contact-form > *'),{y:16,opacity:0,stagger:.05,duration:.7},0.7);
+   const cleanups=[reveal(q('.contact-side > *'),{stagger:.08}),reveal(q('.topic-card'),{y:28,stagger:.1}),reveal(q('.contact-aside > *'),{y:40,stagger:.12})];
+   gsap.to(q('.contact-bits'),{yPercent:-50,duration:60,ease:'none',repeat:-1});
+   return()=>{restore();cleanups.forEach(fn=>fn?.())};
+  });
+  // A soft light follows the pointer across the band.
+  mm.add(`${motionOK} and ${finePointer}`,()=>{
+   const band=q('.contact-band')[0],glow=q('.contact-glow')[0];
+   gsap.set(glow,{left:0,top:0,xPercent:-50,yPercent:-50,x:band.offsetWidth*.72,y:band.offsetHeight*.3});
+   const xTo=gsap.quickTo(glow,'x',{duration:1,ease:'power3'}),yTo=gsap.quickTo(glow,'y',{duration:1,ease:'power3'});
+   const move=e=>{const r=band.getBoundingClientRect();xTo(e.clientX-r.left);yTo(e.clientY-r.top)};
+   const host=stage.current; host.addEventListener('pointermove',move);
+   return()=>host.removeEventListener('pointermove',move);
+  });
+ },{scope:stage});
+
+ // Step changes: focus the new step, and in motion mode let its parts arrive in order.
+ useGSAP(()=>{
+  if(draft){readyHeading.current?.focus();if(prefersMotion()){gsap.from('.contact-ready > *',{y:18,opacity:0,stagger:.06,duration:.7,ease:'expo.out'});gsap.from('.ready-mark',{scale:0,rotation:-40,duration:.9,ease:'back.out(2.4)'})}return}
+  if(!returning.current)return;
+  returning.current=false; card.current.querySelector('#contact-message')?.focus();
+  if(prefersMotion())gsap.from('.contact-form > *',{y:14,opacity:0,stagger:.04,duration:.6,ease:'expo.out'});
+ },{scope:card,dependencies:[draft]});
+
+ const update=e=>{const {name,value}=e.target;setValues(v=>({...v,[name]:value}))};
+ const leave=e=>{const {name}=e.target;if(e.target.value)setTouched(t=>({...t,[name]:true}))};
+ const submit=contextSafe(e=>{
+  e.preventDefault(); setTried(true);
+  const first=contactFields.find(key=>errors[key]);
+  if(first){const input=card.current.querySelector(`#contact-${first}`);input.focus();if(prefersMotion())gsap.to(input.closest('.field'),{keyframes:{x:[0,-9,8,-5,3,0]},duration:.45,ease:'none',clearProps:'transform'});return}
+  setDraftNote('');
+  setDraft({subject:`IEEE CIS enquiry: ${values.subject}`,body:`Name: ${values.name.trim()}\nEmail: ${values.email.trim()}\n\n${values.message.trim()}`});
+ });
+ const edit=()=>{returning.current=true;setDraft(null)};
+ const pickTopic=contextSafe(subject=>{
+  setValues(v=>({...v,subject}));
+  const top=card.current.getBoundingClientRect().top;
+  if(top<0||top>innerHeight*.55)card.current.scrollIntoView({behavior:prefersMotion()?'smooth':'auto',block:'start'});
+  if(draft){edit();return}
+  card.current.querySelector('#contact-message')?.focus({preventScroll:true});
+  requestAnimationFrame(contextSafe(()=>{const chip=card.current?.querySelector(`input[value="${subject}"] + span`);if(chip&&prefersMotion())gsap.fromTo(chip,{scale:1},{scale:1.1,duration:.18,yoyo:true,repeat:1,ease:'power2.out'})}));
+ });
+ const copyAddress=()=>copyText(club.email,()=>setAddressNote('Address copied.'),()=>setAddressNote(`Your browser blocked copying. The address is ${club.email}.`));
+ const copyDraft=()=>copyText(`To: ${club.email}\nSubject: ${draft.subject}\n\n${draft.body}`,()=>setDraftNote('Message copied. Paste it into any email app.'),()=>setDraftNote('Your browser blocked copying. Use Open Gmail instead.'));
+
+ return <>
+ <section className="contact-stage container" ref={stage} aria-labelledby="contact-title">
+  <div className="contact-band" aria-hidden="true"><pre className="contact-bits">{bits}{'\n'}{bits}</pre><span className="contact-glow"/></div>
+  <div className="contact-intro">
+   <Eyebrow>CONTACT US</Eyebrow>
+   <h1 className="contact-title" id="contact-title"><span className="line"><span>Good things start</span></span> <span className="line"><span>with a conversation.</span></span></h1>
+   <p className="lead">Ask about an event, suggest a collaboration or share an idea for the chapter.</p>
+   <div className="contact-direct">
+    <span className="contact-direct-label">Or write to us directly</span>
+    <a className="contact-address" href={gmailUrl()} target="_blank" rel="noopener noreferrer" aria-label={`${club.email}, opens Gmail in a new tab`}><span ref={address}>{club.email}</span><Arrow/></a>
+    <div className="contact-direct-actions"><button type="button" onClick={copyAddress}>Copy address</button><a href={mailtoUrl()}>Open in mail app</a></div>
+    <p className="contact-note" role="status">{addressNote}</p>
+   </div>
+  </div>
+  <div className="contact-card" ref={card}>
+   <ol className="contact-steps" data-step={draft?2:1}><li aria-current={draft?undefined:'step'}><span aria-hidden="true">1</span>Write your message</li><li aria-current={draft?'step':undefined}><span aria-hidden="true">2</span>Send it from your inbox</li></ol>
+   {draft?<div className="contact-ready">
+    <span className="ready-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+    <h2 tabIndex={-1} ref={readyHeading}>Your email is ready</h2>
+    <p>Open it in Gmail or your mail app, check it, then press Send.</p>
+    <dl className="ready-summary"><div><dt>To</dt><dd>{club.email}</dd></div><div><dt>Subject</dt><dd>{draft.subject}</dd></div></dl>
+    <div className="ready-actions"><a className="button" href={gmailUrl(draft.subject,draft.body)} target="_blank" rel="noopener noreferrer">Open Gmail <Arrow/></a><a className="ready-secondary" href={mailtoUrl(draft.subject,draft.body)}>Use mail app</a><button type="button" className="ready-secondary" onClick={copyDraft}>Copy message</button></div>
+    <p className="contact-help">Gmail opens in a new tab and may ask you to sign in. Use mail app needs an email app set up on this device.</p>
+    <p className="contact-note" role="status">{draftNote}</p>
+    <button type="button" className="ready-back" onClick={edit}><span aria-hidden="true">←</span> Edit message</button>
+   </div>:<form className="contact-form" noValidate onSubmit={submit}>
+    <h2>Send us a message</h2>
+    <p className="contact-help">This form prepares an email for you. You send it yourself from Gmail or your mail app.</p>
+    <div className="field-row">
+     <Field id="name" label="Name" autoComplete="name" maxLength={100} value={values.name} onChange={update} onBlur={leave} error={shown('name')}/>
+     <Field id="email" label="Email" hint="So we can reply" type="email" inputMode="email" autoComplete="email" value={values.email} onChange={update} onBlur={leave} error={shown('email')}/>
+    </div>
+    <fieldset className="subject-chips"><legend>Topic</legend><div>{contactSubjects.map(s=><label key={s}><input type="radio" name="subject" value={s} checked={values.subject===s} onChange={update}/><span>{s}</span></label>)}</div></fieldset>
+    <Field id="message" label="Message" textarea rows={6} maxLength={3000} placeholder="What would you like to ask or share?" value={values.message} onChange={update} onBlur={leave} error={shown('message')} counter={`${values.message.length} / 3000`}/>
+    <button className="button contact-submit" type="submit">Prepare email <Arrow/></button>
+   </form>}
+  </div>
+  <div className="contact-side">
+   <h2>What’s it about?</h2>
+   <p>Pick a topic and it goes straight into your message.</p>
+   <div className="topic-cards">{contactTopics.map(([subject,title,text])=><button type="button" key={subject} className="topic-card" aria-pressed={values.subject===subject} onClick={()=>pickTopic(subject)}><span className="topic-card-title">{title}</span><span className="topic-card-text">{text}</span><span className="topic-card-cue" aria-hidden="true">{values.subject===subject?'Selected':'Use this topic'}</span></button>)}</div>
+  </div>
+  <div className="contact-aside">
+   <div className="contact-follow"><h3>Follow the chapter</h3><div className="follow-links">{[['Instagram',club.instagram,'@ieee_cisvitpune'],['LinkedIn',club.linkedin,'Company page']].filter(([,url])=>url).map(([name,url,handle])=><a key={name} href={url} target="_blank" rel="noopener noreferrer"><SocialIcon name={name}/><span><strong>{name}</strong><small>{handle}</small></span><Arrow/></a>)}</div></div>
+   <div className="contact-location" aria-labelledby="find-us"><div className="contact-location-copy"><h2 id="find-us">Our campus</h2><p><strong>IEEE CIS · VIT Pune</strong><br/>{club.address}</p><a className="text-link" href={club.mapsUrl} target="_blank" rel="noopener noreferrer">Open in Google Maps <Arrow/></a></div><div className="contact-map"><iframe title="Vishwakarma Institute of Technology Pune location" src="https://www.google.com/maps?q=Vishwakarma%20Institute%20of%20Technology%20Pune&output=embed" loading="lazy" referrerPolicy="no-referrer-when-downgrade"/></div></div>
+  </div>
+ </section>
+ </>;
 }
-function Contact(){return <><section className="page-heading container centered"><Eyebrow>CONTACT US</Eyebrow><h1>Good things start<br/>with a conversation.</h1><p className="lead">Questions, collaborations or a new idea — there’s a place for all of them here.</p></section><section className="container contact-grid"><div className="contact-panel"><Eyebrow>REACH OUT</Eyebrow><h2>We’d love to hear from you.</h2>{club.email&&<div id="email"><a className="contact-email" href={gmailUrl()} target="_blank" rel="noopener noreferrer" title="Compose an email in Gmail">{club.email} <Arrow/></a><EmailActions/></div>}<div className="contact-reasons"><h3>Chapter & event enquiries</h3><p>Find out more about our activities and how you can be part of them.</p><h3>Collaborations</h3><p>Bring an idea for a talk, a session or a shared learning opportunity.</p><h3>Feedback & suggestions</h3><p>Help us make the chapter a better place to connect and learn.</p></div></div><ContactForm/></section><section className="container location-section"><div><Eyebrow>FIND US</Eyebrow><h2>Our campus.</h2><h3>IEEE CIS · VIT Pune</h3><p>{club.address}</p><a className="text-link" href={club.mapsUrl} target="_blank" rel="noopener noreferrer">Open in Google Maps <Arrow/></a></div><iframe title="Vishwakarma Institute of Technology Pune location" src="https://www.google.com/maps?q=Vishwakarma%20Institute%20of%20Technology%20Pune&output=embed" loading="lazy" referrerPolicy="no-referrer-when-downgrade"/></section></>}
 function Socials({full=false}){return <div className={full?'social-list':'socials'}>{[['Instagram',club.instagram],['LinkedIn',club.linkedin],['Email',club.email?gmailUrl():'']].map(([label,url])=>url?<a key={label} href={url} target="_blank" rel="noopener noreferrer"><span className="social-link-label">{label!=='Email' && <SocialIcon name={label}/>} {label}</span> <Arrow/></a>:<span key={label} title="Official link coming soon">{label}{full&&<small>Coming soon</small>}</span>)}</div>}
 function Footer(){return <footer><div className="container footer-top"><div><Link to="/" aria-label="IEEE CIS home"><Logo/></Link><p className="footer-tagline">LEAD IMPACT INNOVATE</p></div><div><span className="footer-label">EXPLORE</span><nav aria-label="Footer navigation">{links.map(([to,label])=><Link key={to} to={to}>{label}</Link>)}</nav></div><div><span className="footer-label">CONNECT</span><Socials/><p className="small">Vishwakarma Institute of Technology<br/>Pune, India</p></div></div><div className="container footer-bottom"><span>© {new Date().getFullYear()} IEEE CIS · VIT Pune</span><span>Made for curious minds.</span></div></footer>}
 createRoot(document.getElementById('root')).render(<BrowserRouter><App/></BrowserRouter>);
