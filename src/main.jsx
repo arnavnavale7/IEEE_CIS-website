@@ -5,20 +5,76 @@ import { club, team, events, gallery } from './content';
 import './style.css';
 import './identity.css';
 import './motion.css';
-import { TopicExplorer, BackToTop } from './interactions';
+import { BackToTop } from './interactions';
 import './interactions.css';
 import { BinaryHeadline } from './BinaryHeadline';
+import { MatrixRain } from './MatrixRain';
 
 const links = [['/', 'Home'], ['/past-events', 'Past events'], ['/upcoming-events', 'Upcoming events'], ['/contact', 'Contact us']];
+const navLinks = [['/', 'Home'], ['/#about', 'About'], ['/upcoming-events', 'Events'], ['/#team', 'Team']];
 const Arrow = () => <span aria-hidden="true">↗</span>;
 function Logo(){return <img className="logo" src="/images/club-logo-sticker.png" alt="VIT Pune IEEE Computational Intelligence Society"/>}
 function SocialIcon({name}){return name==='Instagram'?<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.4" cy="6.6" r="1" fill="currentColor" stroke="none"/></svg>:<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M20.45 2H3.55C2.69 2 2 2.68 2 3.52v16.96c0 .84.69 1.52 1.55 1.52h16.9c.86 0 1.55-.68 1.55-1.52V3.52c0-.84-.69-1.52-1.55-1.52ZM7.93 18.75H4.98V9.2h2.95v9.55ZM6.45 7.9a1.71 1.71 0 1 1 0-3.42 1.71 1.71 0 0 1 0 3.42Zm12.3 10.85H15.8V14.1c0-1.11-.02-2.54-1.55-2.54-1.55 0-1.79 1.21-1.79 2.46v4.73H9.51V9.2h2.83v1.3h.04c.39-.74 1.36-1.53 2.79-1.53 2.98 0 3.58 1.96 3.58 4.51v5.27Z"/></svg>}
 function NavbarSocials(){return <div className="header-socials" aria-label="Social media">{[['Instagram',club.instagram],['LinkedIn',club.linkedin]].filter(([,url])=>url).map(([name,url])=><a key={name} href={url} target="_blank" rel="noopener noreferrer" aria-label={`IEEE CIS on ${name}`} title={name}><SocialIcon name={name}/></a>)}</div>}
 function App(){
- const [menu,setMenu]=useState(false); const {pathname,hash}=useLocation();
- useEffect(()=>{if(!menu)return;const close=e=>{if(e.key==='Escape'){setMenu(false);document.querySelector('.menu-toggle')?.focus()}};document.addEventListener('keydown',close);return()=>document.removeEventListener('keydown',close)},[menu]);
- useEffect(()=>{setMenu(false);if(hash){requestAnimationFrame(()=>document.getElementById(hash.slice(1))?.scrollIntoView())}else{window.scrollTo(0,0);} const title=links.find(([p])=>p===pathname)?.[1] || 'Event details'; document.title=`${title} · IEEE CIS VIT Pune`;},[pathname,hash]);
- return <><a className="skip" href="#main">Skip to content</a><header><div className="container header-inner"><Link to="/" aria-label="IEEE CIS home"><Logo/></Link><button className="menu-toggle" aria-expanded={menu} aria-controls="main-nav" onClick={()=>setMenu(!menu)}>{menu?'Close ✕':'Menu ☰'}</button><nav id="main-nav" className={menu?'open':''} aria-label="Main navigation">{links.map(([to,label])=><NavLink key={to} end={to==='/'} to={to}>{label}</NavLink>)}<NavbarSocials/></nav><a className="header-team" href="/#team">Meet the team <Arrow/></a></div></header><main id="main"><Routes><Route path="/" element={<Home/>}/><Route path="/past-events" element={<EventsPage status="past"/>}/><Route path="/upcoming-events" element={<EventsPage status="upcoming"/>}/><Route path="/events/:id" element={<EventDetail/>}/><Route path="/contact" element={<Contact/>}/><Route path="*" element={<section className="container section"><h1>Page not found.</h1><Link className="button" to="/">Back to home</Link></section>}/></Routes></main><Footer/><BackToTop/></>;
+ const [navOpen,setNavOpen]=useState(true);
+ const [logoRot,setLogoRot]=useState(0);
+ const {pathname,hash}=useLocation();
+
+ const toggleNav=()=>{
+  setNavOpen(v=>!v);
+  setLogoRot(r=>r+360);
+ };
+ const openNav=()=>{
+  if(!navOpen){
+   setNavOpen(true);
+   setLogoRot(r=>r+360);
+  }
+ };
+ const closeNav=()=>{
+  if(navOpen){
+   setNavOpen(false);
+   setLogoRot(r=>r+360);
+  }
+ };
+
+ useEffect(()=>{
+  const close=e=>{if(e.key==='Escape'){closeNav()}};
+  document.addEventListener('keydown',close);
+  return()=>document.removeEventListener('keydown',close);
+ },[navOpen]);
+
+ useEffect(()=>{
+  if(hash){
+   requestAnimationFrame(()=>document.getElementById(hash.slice(1))?.scrollIntoView())
+  }else{
+   window.scrollTo(0,0);
+  }
+  const title=links.find(([p])=>p===pathname)?.[1] || 'Event details';
+  document.title=`${title} · IEEE CIS VIT Pune`;
+ },[pathname,hash]);
+
+ return <>
+  <a className="skip" href="#main">Skip to content</a>
+  <header>
+   <div className="header-inner container">
+    <nav id="main-nav" className={navOpen?'open':'collapsed'} aria-label="Main navigation">
+     <div className="nav-wing nav-left">
+      <NavLink end to="/" onClick={openNav}>Home</NavLink>
+      <NavLink to="/#about" onClick={openNav}>About</NavLink>
+     </div>
+     <button className="nav-logo-btn" aria-expanded={navOpen} aria-controls="main-nav" onClick={toggleNav} aria-label={navOpen?"Collapse navbar to circular logo":"Open navigation menu"} title={navOpen?"Collapse navbar to logo":"Open navigation menu"}>
+      <img className="nav-circle-logo" src="/images/ieee-cis-circle-logo.png" alt="IEEE CIS VIT Pune" style={{transform:`rotate(${logoRot}deg)`}}/>
+     </button>
+     <div className="nav-wing nav-right">
+      <NavLink to="/upcoming-events" onClick={openNav}>Events</NavLink>
+      <NavLink to="/#team" onClick={openNav}>Team</NavLink>
+      <NavLink to="/contact" onClick={openNav}>Contact</NavLink>
+     </div>
+    </nav>
+   </div>
+  </header>
+  <main id="main"><Routes><Route path="/" element={<Home/>}/><Route path="/past-events" element={<EventsPage status="past"/>}/><Route path="/upcoming-events" element={<EventsPage status="upcoming"/>}/><Route path="/events/:id" element={<EventDetail/>}/><Route path="/contact" element={<Contact/>}/><Route path="*" element={<section className="container section"><h1>Page not found.</h1><Link className="button" to="/">Back to home</Link></section>}/></Routes></main><Footer/><BackToTop/></>;
 }
 function Eyebrow({children}){return <p className="eyebrow"><span/> {children}</p>}
 function PurposeIcon({kind}){
@@ -27,12 +83,14 @@ function PurposeIcon({kind}){
 }
 function Home(){
  return <>
- <section className="chapter-hero container">
-  <BinaryHeadline className="hero-editorial">
-   <div className="hero-title"><h1><span className="headline-top">LEAD <span className="headline-divider" aria-hidden="true">/</span> IMPACT</span><em>INNOVATE<span className="heading-dot">.</span></em></h1><p className="editorial-caption">Different minds. Shared possibilities.</p></div>
-   <div className="hero-note"><p>We’re a community of curious minds exploring computational intelligence, sharing ideas and learning by doing.</p><div className="actions"><Link className="button" to="/past-events">Discover the chapter <Arrow/></Link><a className="text-link" href="#about">Our story <span aria-hidden="true">↓</span></a></div></div>
-  </BinaryHeadline>
-  <TopicExplorer/>
+ <section className="chapter-hero-wrap">
+  <div className="hero-matrix-bg" aria-hidden="true"><MatrixRain/></div>
+  <div className="container chapter-hero">
+   <BinaryHeadline className="hero-editorial">
+    <div className="hero-title"><h1><span className="headline-top">LEAD <span className="headline-divider" aria-hidden="true">/</span> IMPACT</span><em>INNOVATE<span className="heading-dot">.</span></em></h1><p className="editorial-caption">Different minds. Shared possibilities.</p></div>
+    <div className="hero-note"><p>We’re a community of curious minds exploring computational intelligence, sharing ideas and learning by doing.</p><div className="actions"><Link className="button hero-btn" to="/past-events">Discover the chapter <Arrow/></Link><a className="text-link hero-link" href="#about">Our story <span aria-hidden="true">↓</span></a></div></div>
+   </BinaryHeadline>
+  </div>
  </section>
  <section id="about" className="container chapter-about section">
   <div className="chapter-about-content"><Eyebrow>OUR PURPOSE</Eyebrow><h2>Intelligence is a field.<br/><em>Curiosity is a starting point.</em></h2><p className="about-intro">IEEE Computational Intelligence Society at Vishwakarma Institute of Technology, Pune brings students together to explore what comes next.</p><p>We make room for questions, experiments and new perspectives. Through conversations and shared learning, we turn an interest in technology into a community.</p></div>

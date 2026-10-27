@@ -1,6 +1,6 @@
 /* Motion is limited to interaction feedback, a brief entrance and team slides. */
 :root{--ease:cubic-bezier(.2,.7,.3,1)}
-.button,.header-team,.menu-toggle,.copy-email,.lightbox-controls button,.lightbox-close,.header-socials a{transition:background-color 160ms ease,color 160ms ease,box-shadow 180ms ease,transform 180ms var(--ease)}
+.button,.menu-toggle,.copy-email,.lightbox-controls button,.lightbox-close,.header-socials a{transition:background-color 160ms ease,color 160ms ease,box-shadow 180ms ease,transform 180ms var(--ease)}
 .text-link,.footer-top a,.contact-email,.header-inner nav>a{transition:color 160ms ease,background-color 160ms ease}
 .button>span,.text-link>span,.header-team>span{transition:transform 180ms var(--ease)}
 .event-card,.purpose-card{transition:transform 220ms var(--ease),border-color 180ms ease,box-shadow 220ms ease}
