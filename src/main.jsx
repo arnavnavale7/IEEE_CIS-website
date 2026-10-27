@@ -119,7 +119,7 @@ function Contact(){
    const tl=gsap.timeline({defaults:{ease:'expo.out',duration:1.1}});
    tl.from(q('.contact-band'),{opacity:0,scale:.96,duration:1.3})
     .from(q('.contact-intro .eyebrow'),{y:14,opacity:0,duration:.7},'<0.2')
-    .from(q('.contact-title .line>span'),{yPercent:110,stagger:.12},'<0.05')
+    .from(q('.contact-title .line>span'),{yPercent:110,opacity:0,stagger:.12},'<0.05')
     .from(q('.contact-intro .lead'),{y:18,opacity:0,duration:.8},'<0.35')
     .from(q('.contact-direct'),{y:18,opacity:0,duration:.8},'<0.1')
     .add(tween,'<0.15')

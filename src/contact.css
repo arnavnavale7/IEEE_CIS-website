@@ -109,6 +109,7 @@
 .contact-band{border-radius:20px}
 .contact-intro{padding:38px 20px 92px}
 .contact-title{font-size:clamp(36px,10.5vw,48px)}
+.contact-title .line,.contact-title .line>span{display:inline}
 .contact-direct{margin-top:32px;padding-top:22px}
 .contact-address{font-size:clamp(22px,6.6vw,28px);gap:12px}.contact-address>span:last-child{width:36px;height:36px;font-size:16px}
 .contact-card{margin:-64px 0 0;padding:24px 18px;border-radius:18px}
